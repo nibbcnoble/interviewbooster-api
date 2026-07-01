@@ -9,7 +9,7 @@ app.use(express.json());
 
 // Define a simple test route
 app.get('/', (req, res) => {
-    res.send('How many assholes we got on this ship anyhow?');
+    res.send('How many assholes we got on this ship anyhow? ... Keep firing assholes');
 });
 
 // Start the server
