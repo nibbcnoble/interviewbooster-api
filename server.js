@@ -1,18 +1,24 @@
 const express = require('express');
 require('dotenv').config();
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+const cors = require('cors');
 
-// Enable JSON parsing middleware (useful for reading request bodies)
+const app = express();
+const PORT = process.env.PORT || 8080; // App Service injects PORT
+
+app.use(cors({
+  origin: 'https://wonderful-wave-025108c1e.7.azurestaticapps.net'
+}));
 app.use(express.json());
 
-// Define a simple test route
-app.get('/', (req, res) => {
-    res.send('How many assholes we got on this ship anyhow? ... Keep firing assholes');
+app.get('/api/hello', (req, res) => {
+  res.json({ message: 'Hello from Express on App Service!' });
 });
 
-// Start the server
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.listen(PORT, () => {
-    console.log(`Server is happily listening at http://localhost:${PORT}`);
+  console.log(`API running on port ${PORT}`);
 });
