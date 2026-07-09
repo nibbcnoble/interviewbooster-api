@@ -3,7 +3,8 @@ require('dotenv').config();
 const cors = require('cors');
 const session = require('express-session');
 const { createClient } = require('redis');
-const RedisStore = require('connect-redis').default;
+const { RedisStore } = require('connect-redis');
+
 
 const app = express();
 const PORT = process.env.PORT || 8080; // App Service injects PORT
