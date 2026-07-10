@@ -26,7 +26,7 @@ router.post("/grade", async (req, res) => {
   }
 });
 */
-router.post('/interview/grade', async (req, res) => {
+router.post('/grade', async (req, res) => {
   try {
     const result = await callGradingService(req.body);
     res.json(result);
