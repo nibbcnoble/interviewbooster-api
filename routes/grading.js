@@ -31,8 +31,12 @@ router.post('/grade', async (req, res) => {
     const result = await callGradingService(req.body);
     res.json(result);
   } catch (err) {
-    console.error('Grading service call failed:', err.message);
-    res.status(502).json({ error: 'Grading service unavailable' });
+    console.error('Grading service call failed:', err);
+    res.status(502).json({
+      error: 'Grading service unavailable',
+      debug: err.message,
+      stack: err.stack
+    });
   }
 });
 

@@ -10,8 +10,15 @@ async function getGradingToken() {
 }
 
 async function callGradingService(payload) {
-  const token = await getGradingToken();
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[dev] Stubbing grading service call, payload:', payload);
+    return {
+      score: 85,
+      feedback: 'This is a stubbed local response — grading service not called.',
+    };
+  }
 
+  const token = await getGradingToken();
   const res = await fetch(process.env.GRADING_SERVICE_URL, {
     method: 'POST',
     headers: {
