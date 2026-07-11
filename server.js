@@ -11,6 +11,7 @@ const requireAuth = require('./middleware/requireAuth');
 
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 8080; // App Service injects PORT
 
 const redisClient = createClient({
