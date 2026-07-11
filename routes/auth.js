@@ -18,6 +18,7 @@ router.get('/login/:provider', async (req, res) => {
   const nonce = client.randomNonce();
 
   req.session.oauthState = { provider, code_verifier, state, nonce };
+console.log('[login] session ID:', req.sessionID, 'oauthState set:', req.session.oauthState);
 
   const authUrl = client.buildAuthorizationUrl(config, {
     redirect_uri: `${process.env.BASE_URL}/api/auth/callback/${provider}`,
@@ -28,16 +29,26 @@ router.get('/login/:provider', async (req, res) => {
     nonce,
   });
 
+  console.log('[login] session ID:', req.sessionID);
+console.log('[login] NODE_ENV:', process.env.NODE_ENV);
+console.log('[login] cookie config:', JSON.stringify(req.session.cookie));
   req.session.save((err) => {
-    if (err) {
-      console.error('Session save failed before OAuth redirect:', err);
-      return res.status(500).send('Failed to start login');
-    }
-    res.redirect(authUrl.href);
+  if (err) {
+    console.error('[login] session save FAILED:', err);
+    return res.status(500).send('Failed to start login');
+  }
+  console.log('[login] session save SUCCEEDED for ID:', req.sessionID);
+  res.redirect(authUrl.href);
   });
 });
 
 router.get('/callback/:provider', async (req, res) => {
+  console.log('[callback] session ID:', req.sessionID);
+console.log('[callback] raw cookie header received:', req.headers.cookie);
+console.log('[callback] oauthState present:', req.session.oauthState);
+console.log('[callback] full session object:', JSON.stringify(req.session));
+  console.log('[callback] session ID:', req.sessionID, 'oauthState present:', req.session.oauthState);
+
   const { provider } = req.params;
   const saved = req.session.oauthState;
 
