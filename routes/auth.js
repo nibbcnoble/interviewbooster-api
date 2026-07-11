@@ -17,7 +17,6 @@ router.get('/login/:provider', async (req, res) => {
   const state = client.randomState();
   const nonce = client.randomNonce();
 
-  // Short-lived — distinct from req.session.user, which only gets set on successful login
   req.session.oauthState = { provider, code_verifier, state, nonce };
 
   const authUrl = client.buildAuthorizationUrl(config, {
@@ -29,7 +28,13 @@ router.get('/login/:provider', async (req, res) => {
     nonce,
   });
 
-  res.redirect(authUrl.href);
+  req.session.save((err) => {
+    if (err) {
+      console.error('Session save failed before OAuth redirect:', err);
+      return res.status(500).send('Failed to start login');
+    }
+    res.redirect(authUrl.href);
+  });
 });
 
 router.get('/callback/:provider', async (req, res) => {
