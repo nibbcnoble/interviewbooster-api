@@ -64,6 +64,9 @@ async function start() {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
+  const beatlesRoutes = require('./routes/beatles.js');
+  app.use('/api', beatlesRoutes);
+
   // Auth routes — must be mounted BEFORE the requireAuth gate below,
   // since /login and /callback have to stay reachable while unauthenticated
   const authRoutes = require('./routes/auth');
