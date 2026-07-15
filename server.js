@@ -4,7 +4,7 @@ const helmet = require('helmet');
 const session = require('express-session');
 const { createClient } = require('redis');
 const { RedisStore } = require('connect-redis');
-
+const { connectToMongo, closeMongo } = require('./middleware/mongo');
 const { initProviders } = require('./auth/providers');
 const requireAuth = require('./middleware/requireAuth');
 
@@ -26,7 +26,11 @@ const redisClient = createClient({
 redisClient.on('error', err => console.log('Redis Client Error', err));
 
 async function start() {
-  await redisClient.connect();
+
+  await Promise.all([
+    connectToMongo(),
+    redisClient.connect() // wherever that lives
+  ]);
 
   // openid-client discovery does a network round-trip to each provider's
   // /.well-known endpoint — must resolve before auth routes can work
@@ -57,6 +61,7 @@ async function start() {
     res.json({ message: 'Communication verified. Application API is accessible.' });
   });
 
+
   app.get('/api/ping', (req, res) => res.send('api-prefix-preserved'));
   app.get('/ping', (req, res) => res.send('api-prefix-stripped'));
 
@@ -64,8 +69,6 @@ async function start() {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-  const beatlesRoutes = require('./routes/beatles.js');
-  app.use('/api', beatlesRoutes);
 
   // Auth routes — must be mounted BEFORE the requireAuth gate below,
   // since /login and /callback have to stay reachable while unauthenticated
@@ -78,6 +81,12 @@ async function start() {
   app.use('/api', helmet());
   app.use('/api', requireAuth);
 
+  const beatlesRoutes = require('./routes/beatles.js');
+  app.use('/api', beatlesRoutes);
+
+  const studyRoutes = require('./routes/study.js');
+  app.use('/api/study', studyRoutes);
+
   const gradingRoutes = require('./routes/grading');
   app.use('/api', gradingRoutes);
 
@@ -89,4 +98,9 @@ async function start() {
 start().catch(err => {
   console.error('Failed to start server:', err);
   process.exit(1);
+});
+
+process.on('SIGINT', async () => {
+  await closeMongo();
+  process.exit(0);
 });

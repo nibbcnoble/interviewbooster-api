@@ -20,6 +20,7 @@
     "express-session": "^1.19.0",
     "helmet": "^8.2.0",
     "ioredis": "^5.11.1",
+    "mongodb": "^7.5.0",
     "openid-client": "^6.8.4",
     "rate-limit-redis": "^5.0.0",
     "redis": "^6.1.0"
