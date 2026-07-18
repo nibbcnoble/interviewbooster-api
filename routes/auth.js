@@ -2,7 +2,7 @@
 const { Router } = require('express');
 const client = require('openid-client');
 const { getConfig } = require('../auth/providers');
-
+const { encryptEmail, decryptEmail } = require('../middleware/loginMod');
 const router = Router();
 
 router.get('/login/:provider', async (req, res) => {
@@ -71,6 +71,7 @@ console.log('[callback] full session object:', JSON.stringify(req.session));
     req.session.user = {
       id: claims.sub,
       email: claims.email ?? claims.preferred_username ?? null,
+      enc:encryptEmail(claims.email ?? claims.preferred_username ?? ""),
       name: claims.name ?? null,
       provider,
     };

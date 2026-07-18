@@ -90,6 +90,9 @@ async function start() {
   const gradingRoutes = require('./routes/grading');
   app.use('/api', gradingRoutes);
 
+  const stocksRoutes = require('./routes/stocks');
+  app.use('/api', stocksRoutes);
+
   app.listen(PORT, () => {
     console.log(`API running on port ${PORT}`);
   });

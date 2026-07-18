@@ -24,6 +24,11 @@ async function connectToMongo() {
   try {
     await client.connect();
     db = client.db(dbName);
+
+    await db.collection('stockRecords').createIndex(
+      { enc: 1, symbol: 1 },
+      { unique: true }
+    );
     console.log(`Connected to MongoDB database: ${dbName}`);
 
     // Optional: verify connection
