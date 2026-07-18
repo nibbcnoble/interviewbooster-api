@@ -176,14 +176,12 @@ async function callTwelveDataTimeSeries(symbol, range) {
 function normalizeTwelveDataPointTime(datetime) {
   if (typeof datetime !== 'string') return null;
 
-  // Intraday format like "2026-07-13 09:30:00"
   if (datetime.includes(' ')) {
     const millis = new Date(datetime.replace(' ', 'T') + 'Z').getTime();
     if (!Number.isFinite(millis)) return null;
     return Math.floor(millis / 1000);
   }
 
-  // Daily/weekly/monthly format like "2026-07-13"
   const dateOnly = datetime.trim();
   if (!dateOnly) return null;
   return dateOnly;
@@ -202,7 +200,6 @@ function normalizeTwelveDataSeries(values) {
       return aTime - bTime;
     });
 }
-
 
 async function fetchTwelveDataSeries(symbol, range) {
   const result = await callTwelveDataTimeSeries(symbol, range);
@@ -225,7 +222,6 @@ async function fetchTwelveDataSeries(symbol, range) {
     ...summary,
   };
 }
-
 
 // GET /api/stocks
 router.get('/stocks', async (req, res) => {
@@ -320,7 +316,7 @@ router.get('/stocks/:symbol/market-data', async (req, res) => {
       return res.status(400).json({ error: 'A valid time series range is required.' });
     }
 
-  const marketData = await fetchTwelveDataSeries(symbol, range);
+    const marketData = await fetchTwelveDataSeries(symbol, range);
 
     res.json({
       ok: true,
@@ -333,7 +329,6 @@ router.get('/stocks/:symbol/market-data', async (req, res) => {
       priceChange: marketData.priceChange,
       priceChangePercent: marketData.priceChangePercent,
     });
-
   } catch (err) {
     console.error('GET /api/stocks/:symbol/market-data error', err);
     res.status(err.statusCode || 500).json({
@@ -476,7 +471,6 @@ router.patch('/stocks/:symbol/timeseries', async (req, res) => {
       stock,
       message: `${symbol} time series updated to ${range}.`,
     });
-
   } catch (err) {
     console.error('PATCH /api/stocks/:symbol/timeseries error', err);
     res.status(500).json({ error: 'Failed to update time series.' });
@@ -508,7 +502,7 @@ router.patch('/stocks/:symbol/chat', async (req, res) => {
     const records = db.collection('stockRecords');
     const now = new Date();
 
-    const result = await records.findOneAndUpdate(
+    const stock = await records.findOneAndUpdate(
       { enc, symbol },
       { $set: { chatHistory, updatedAt: now } },
       {
@@ -517,13 +511,13 @@ router.patch('/stocks/:symbol/chat', async (req, res) => {
       }
     );
 
-    if (!result.value) {
+    if (!stock) {
       return res.status(404).json({ error: 'Stock not found for this user.' });
     }
 
     res.json({
       ok: true,
-      stock: result.value,
+      stock,
       message: `${symbol} chat history updated.`,
     });
   } catch (err) {
@@ -593,6 +587,5 @@ router.post('/stocks/:symbol/chat/messages', async (req, res) => {
     res.status(500).json({ error: 'Failed to process chat message.' });
   }
 });
-
 
 module.exports = router;
